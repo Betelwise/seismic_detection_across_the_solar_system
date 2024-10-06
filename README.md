@@ -35,17 +35,21 @@ Our system is a hybrid of traditional seismic analysis techniques and modern mac
 1. Clone the repository:
    ```bash
    git clone https://github.com/betelwise/seismic_detection_across_the_solar_system
-.git
+
 
 2. Install the required dependencies, This was developed in packages defined in [requirements](requirements.txt). These requirements are, if you want to train your own CNN or make some other changes, howver for making predictions or analyzing results all are not neccessary.
-'''bash
+    '''bash
     pip install -r requirements.txt
 
 ## How to test the results with your own Data
 
 If you want to make predicitons on your own dataset, following is the method to do so;
 1. **Place your Data:** Place your miniseed files folder of Continuos Seismograms in [data](data).
+
 2. **Enter your filePath:** Now open [predictions](predictions.ipynb) notebook and in 3rd cell comment out all foldersPath and place your own path to dataset. You may adjust the tuning parameters for better results, otherwise default tuning settings will be for apollo lunar seismic experiments.
+
 3. **Specify maximum files to display** (optional): If you have a very large dataset. Making Plots of those files may take some time. You can specify how many max files to work on in 6th cell, default settings are 100 max files.
+
 4. **Visualize the results:** in 2nd last cell you can see the results, it will plot all the files and detected events, it will show events that were filtered by conventional algorithms in vertical lines, all the events that were predicted to be positive signals will be represented in green lines and all the events predicted to be false signals will be in Red.
+
 5. **Save the predicitons:** uncomment the save line in last cell and run this cell to save your predicitons in csv format.
