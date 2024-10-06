@@ -46,9 +46,9 @@ Our system is a hybrid of traditional seismic analysis techniques and modern mac
 ## How to test the results with your own Data
 
 If you want to make predicitons on your own dataset, following is the method to do so;
-1. **Place your Data:** Place your miniseed files folder of Continuos Seismograms in [data](data).
+1. **Place your Data:** Place your miniseed files folder of Continuos Seismograms in [data](src/data).
 
-2. **Enter your filePath:** Now open [predictions](predictions.ipynb) notebook and in 3rd cell comment out all foldersPath and place your own path to dataset. You may adjust the tuning parameters for better results, otherwise default tuning settings will be for apollo lunar seismic experiments.
+2. **Enter your filePath:** Now open [predictions](src/predictions.ipynb) notebook and in 3rd cell comment out all foldersPath and place your own path to dataset. You may adjust the tuning parameters for better results, otherwise default tuning settings will be for apollo lunar seismic experiments.
 
 3. **Specify maximum files to display** (optional): If you have a very large dataset. Making Plots of those files may take some time. You can specify how many max files to work on in 6th cell, default settings are 100 max files.
 
