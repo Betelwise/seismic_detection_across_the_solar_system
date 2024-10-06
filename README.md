@@ -3,11 +3,13 @@
 ## Table of Contents
 - [Overview](#overview)
 - [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
+- [How it Works](#How it Works)
+- [Installation](#Installation)
+- [How to test the results with your own Data](#How to test the results with your own Data)
+- [How to see the results](#How to see the results)
+- [Nasa SpaceApps Team Page](#Nasa SpaceApps Team Page)
+- [Contact](#Contact)
+- [license](#license)
 
 ## Overview
 This project is an onboard seismic event detection system designed to optimize the way planetary landers, such as those on Mars, handle seismic data. Instead of transmitting large volumes of continuous seismic data back to Earth—which is costly, time-consuming, and energy-intensive—our algorithm processes the data directly onboard. It filters out noise, identifies seismic events, and only transmits the most relevant information to Earth.
@@ -62,7 +64,6 @@ If you want to make predicitons on your own dataset, following is the method to 
 ## Nasa SpaceApps Team Page
 Find out more about the Challenge and Project in our SpaceApps Team Page
 [Team Page Betelwise](https://www.spaceappschallenge.org/nasa-space-apps-2024/find-a-team/betelwise1/)
-![CProfileEDX_b249dd77-202d-4e36-8d5e-fe04fba41e8aC-topaz-denoise-enhance-3 8x-sharpen](https://github.com/user-attachments/assets/dd9a2a61-3573-4e8c-8905-64ad5676ae67)
 
 ## Contact
 For any questions, feel free to reach out to us via email at [Betelwise.com](betelwise.com).
