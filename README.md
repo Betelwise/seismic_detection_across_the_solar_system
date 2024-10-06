@@ -38,7 +38,7 @@ Our system is a hybrid of traditional seismic analysis techniques and modern mac
 
 
 2. Install the required dependencies, This was developed in packages defined in [requirements](requirements.txt). These requirements are, if you want to train your own CNN or make some other changes, howver for making predictions or analyzing results all are not neccessary.
-    '''bash
+    ```bash
     pip install -r requirements.txt
 
 ## How to test the results with your own Data
