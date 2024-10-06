@@ -3,11 +3,11 @@
 ## Table of Contents
 - [Overview](#overview)
 - [Features](#features)
-- [How it Works](#How it Works)
+- [How it Works](#How-it-Works)
 - [Installation](#Installation)
-- [How to test the results with your own Data](#How to test the results with your own Data)
-- [How to see the results](#How to see the results)
-- [Nasa SpaceApps Team Page](#Nasa SpaceApps Team Page)
+- [How to test the results with your own Data](#How-to-test-the-results-with-your-own-Data)
+- [How to see the results](#How-to-see-the-results)
+- [Nasa SpaceApps Team Page](#Nasa-SpaceApps-Team-Page)
 - [Contact](#Contact)
 - [license](#license)
 
