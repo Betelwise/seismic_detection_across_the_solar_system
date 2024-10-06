@@ -62,6 +62,7 @@ If you want to make predicitons on your own dataset, following is the method to 
 ## Nasa SpaceApps Team Page
 Find out more about the Challenge and Project in our SpaceApps Team Page
 [Team Page Betelwise](https://www.spaceappschallenge.org/nasa-space-apps-2024/find-a-team/betelwise1/)
+![CProfileEDX_b249dd77-202d-4e36-8d5e-fe04fba41e8aC-topaz-denoise-enhance-3 8x-sharpen](https://github.com/user-attachments/assets/dd9a2a61-3573-4e8c-8905-64ad5676ae67)
 
 ## Contact
 For any questions, feel free to reach out to us via email at [Betelwise.com](betelwise.com).
