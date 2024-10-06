@@ -24,8 +24,17 @@ Our system is a hybrid of traditional seismic analysis techniques and modern mac
 
 ## How it Works
 1. **Frequency Windowing:** The algorithm analyzes a full day of seismic data at once, automatically finding the best frequency window for isolating potential quakes.
+2. **Outlier Removal:** High-amplitude, short-burst noise is removed to prevent interference with the subsequent processing steps.
+3. **Normalization:** The data is normalized to ensure consistency in amplitude across different time periods.
+4. **STA/LTA Analysis:** Short-term average/long-term average (STA/LTA) analysis is used to compare seismic events against background noise over a longer timeframe.
+5. **Noise Filtering:** Excessive false signals are eliminated by analyzing how quickly the STA/LTA returns to its mean value.
+6. **CNN Classification:** The final step involves running detected events through a CNN, which further refines the data by distinguishing true seismic events from false positives.
+7. **Cataloging:** The identified seismic events are cataloged, ensuring only the most important data is transmitted back to Earth.
 
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/repo.git
+   git clone https://github.com/betelwise/seismic_detection_across_the_solar_system
+.git
+
+2. Install the required dependencies, This was developed in packages defined in [requirements.txt](requirements.txt)txt
