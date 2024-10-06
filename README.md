@@ -1,4 +1,4 @@
-# seismic_detection_across_the_solar_system
+# Seismic detection across the Solar System
 
 ## Table of Contents
 - [Overview](#overview)
@@ -53,3 +53,15 @@ If you want to make predicitons on your own dataset, following is the method to 
 4. **Visualize the results:** in 2nd last cell you can see the results, it will plot all the files and detected events, it will show events that were filtered by conventional algorithms in vertical lines, all the events that were predicted to be positive signals will be represented in green lines and all the events predicted to be false signals will be in Red.
 
 5. **Save the predicitons:** uncomment the save line in last cell and run this cell to save your predicitons in csv format.
+
+
+
+## How to see the results
+
+
+## Nasa SpaceApps Team Page
+Find out more about the Challenge and Project in our SpaceApps Team Page
+[Team Page Betelwise](https://www.spaceappschallenge.org/nasa-space-apps-2024/find-a-team/betelwise1/)
+
+## Contact
+For any questions, feel free to reach out to us via email at [Betelwise.com](betelwise.com).
