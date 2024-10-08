@@ -66,4 +66,4 @@ Find out more about the Challenge and Project in our SpaceApps Team Page
 [Team Page Betelwise](https://www.spaceappschallenge.org/nasa-space-apps-2024/find-a-team/betelwise1/)
 
 ## Contact
-For any questions, feel free to reach out to us via email at [zain@betelwise.com](zain@betelwise.com).
+For any questions, feel free to reach out to us via email at [zain@betelwise.com](mailto://zain@betelwise.com).
