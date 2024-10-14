@@ -39,7 +39,7 @@ ax.legend()
 # Create the animation
 def update(frame):
     # Calculate interpolation factor (0 to 1)
-    alpha = frame / 100  # You can adjust the number of frames for a smoother animation
+    alpha = frame / 100  # Adjust the number of frames for a smoother animation
 
     # Interpolate between the original and normalized data
     interpolated_data = (1 - alpha) * tr_data + alpha * normalized_data
@@ -52,7 +52,7 @@ def update(frame):
 # Create the animation
 ani = FuncAnimation(fig, update, frames=100, interval=50, blit=True)
 
-# Save the animation to a MP4 file using the 'ffmpeg' writer
+# Save the animation to a GIF file using the 'pillow' writer
 ani.save("normalization_animation.gif", writer='pillow')
 
 # Show the animation in a window
