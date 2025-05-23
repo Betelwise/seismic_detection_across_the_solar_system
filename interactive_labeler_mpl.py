@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import os
 import glob
+from scipy import signal # Needed for spectrogram
 from obspy import UTCDateTime # For time calculations
 
 # Assuming your refactored functions are in src/
@@ -17,13 +18,15 @@ from src.seismic_processing import (
 from src.file_utils import save_event_catalog
 
 # --- Configuration ---
-MSEED_DATA_PATTERN = './old_src/data/lunar/training/data/S16_GradeB/*.mseed' # ADJUST THIS
+MSEED_DATA_PATTERN = './data/training/lunar/*.mseed' # ADJUST THIS
 OUTPUT_CATALOG_FILENAME = "labeled_events_mpl_v3.csv" # Versioning output
 MAX_FILES_TO_PROCESS = None
 ZOOM_WINDOW_SEC = 2*60*60 # Seconds before and after current event P-wave for zoom plot
+SPECTROGRAM_NPERSEG = 256 # Window size for STFT, adjust as needed
+SPECTROGRAM_NOVERLAP_RATIO = 0.5 # Overlap ratio for STFT windows
 
 # --- Global state for the interactive loop ---
-current_label_or_action = None # Can be label (0,1), skip (-1), quit (-2,-3), or bulk action (e.g., 'bulk_0_10')
+current_label_or_action = 2 # Can be label (0,1), skip (-1), quit (-2,-3), or bulk action (e.g., 'bulk_0_10')
 fig_open = True
 
 def on_key(event):
@@ -75,7 +78,8 @@ def display_and_label_event(
     current_label_or_action = None # Reset for this event
     fig_open = True # Reset for this plot
 
-    fig, axs = plt.subplots(3, 1, figsize=(15, 10), sharex=False)
+    fig, axs = plt.subplots(3, 1, figsize=(15, 10), sharex=False,
+                        gridspec_kw={'height_ratios': [1, 1, 0.2]}) # Give spectrogram a bit more height
     fig.canvas.mpl_connect('key_press_event', on_key)
 
     times = trace_processed.times()
@@ -109,19 +113,9 @@ def display_and_label_event(
         if zoom_start_time <= event_time_rel <= zoom_end_time:
             line_color = 'red' if i == current_trigger_idx_in_file else 'green'
             line_style = '-' if i == current_trigger_idx_in_file else '--'
-            axs[1].axvline(event_time_rel, color=line_color, linestyle=line_style, linewidth=(1.5 if i == current_trigger_idx_in_file else 1.0), alpha=(1.0 if i == current_trigger_idx_in_file else 0.6), label=f"Current Evt {i+1}" if i == current_trigger_idx_in_file else f"Other Evt {i+1}")
+            axs[1].axvline(event_time_rel, color=line_color, linestyle=line_style, linewidth=(1.5 if i == current_trigger_idx_in_file else 1.0), alpha=(1.0 if i == current_trigger_idx_in_file else 0.6))
     axs[1].legend(loc="upper right", fontsize='small')
-
-    # --- Plot 3: CFT ---
-    if cft_data is not None:
-        cft_times = np.linspace(0, times[-1] if len(times) > 0 else 0, len(cft_data), endpoint=False)
-        axs[2].plot(cft_times, cft_data, label="STA/LTA CFT", color='orange')
-        if 'thr_on' in current_settings:
-             axs[2].axhline(current_settings['thr_on'], color='magenta', linestyle=':', label=f"Thr_on={current_settings['thr_on']:.2f}")
-        axs[2].set_ylabel("CFT Value")
-        axs[2].grid(True)
-        axs[2].set_xlim(times[0], times[-1])
-        axs[2].legend(loc="upper right", fontsize='small')
+    
 
     xlabel_text = (
         "Time (s) relative to trace start\n"
