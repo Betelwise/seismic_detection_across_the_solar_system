@@ -18,102 +18,101 @@ from src.file_utils import save_event_catalog
 
 # --- Configuration ---
 MSEED_DATA_PATTERN = './old_src/data/lunar/training/data/S16_GradeB/*.mseed' # ADJUST THIS
-OUTPUT_CATALOG_FILENAME = "labeled_events_mpl_v2.csv"
+OUTPUT_CATALOG_FILENAME = "labeled_events_mpl_v3.csv" # Versioning output
 MAX_FILES_TO_PROCESS = None
-ZOOM_WINDOW_SEC = 1*60*60 # Seconds before and after current event P-wave for zoom plot
+ZOOM_WINDOW_SEC = 2*60*60 # Seconds before and after current event P-wave for zoom plot
 
 # --- Global state for the interactive loop ---
-current_label = None
+current_label_or_action = None # Can be label (0,1), skip (-1), quit (-2,-3), or bulk action (e.g., 'bulk_0_10')
 fig_open = True
 
 def on_key(event):
     """Handles key press events for labeling."""
-    global current_label, fig_open
-    # print(f"Key pressed: {event.key}") # Optional: for debugging
+    global current_label_or_action, fig_open
+    # print(f"Key pressed: {event.key}")
     if event.key == 'y':
-        current_label = 1
+        current_label_or_action = 1 # Is an event
         plt.close(event.canvas.figure)
     elif event.key == 'n':
-        current_label = 0
+        current_label_or_action = 0 # Not an event
         plt.close(event.canvas.figure)
     elif event.key == 's':
-        current_label = -1
+        current_label_or_action = -1 # Skip this event
         plt.close(event.canvas.figure)
     elif event.key == 'q':
-        current_label = -2
+        current_label_or_action = -2 # Quit current file
         fig_open = False
         plt.close(event.canvas.figure)
     elif event.key == 'escape':
-        current_label = -3
+        current_label_or_action = -3 # Quit all
         fig_open = False
+        plt.close(event.canvas.figure)
+    # Bulk labeling keys - using F-keys as an example
+    elif event.key == 'f5': # Label next 5 as NOT EVENT
+        current_label_or_action = 'bulk_0_5'
+        plt.close(event.canvas.figure)
+    elif event.key == 'f10': # Label next 10 as NOT EVENT
+        current_label_or_action = 'bulk_0_10'
+        plt.close(event.canvas.figure)
+    elif event.key == 'f12': # Label next 20 as NOT EVENT
+        current_label_or_action = 'bulk_0_20'
         plt.close(event.canvas.figure)
 
 
 def display_and_label_event(
     trace_processed,
     cft_data,
-    all_triggers_in_file_samples, # List of all [start, end] triggers in this file
-    current_trigger_idx_in_file, # Index of the current trigger we are labeling
+    all_triggers_in_file_samples,
+    current_trigger_idx_in_file,
     file_info,
     current_settings
 ):
     """
-    Displays the event using Matplotlib (full trace and zoomed view) and waits for a key press.
-    Returns the label.
+    Displays the event using Matplotlib and waits for a key press.
+    Returns the label or action.
     """
-    global current_label, fig_open
-    current_label = None
-    fig_open = True
+    global current_label_or_action, fig_open
+    current_label_or_action = None # Reset for this event
+    fig_open = True # Reset for this plot
 
-    fig, axs = plt.subplots(3, 1, figsize=(15, 10), sharex=False) # 3 plots now
+    fig, axs = plt.subplots(3, 1, figsize=(15, 10), sharex=False)
     fig.canvas.mpl_connect('key_press_event', on_key)
 
-    times = trace_processed.times() # Relative times for this trace
+    times = trace_processed.times()
     waveform_data = trace_processed.data
     sampling_rate = trace_processed.stats.sampling_rate
 
-    current_trigger_start_sample, current_trigger_end_sample = all_triggers_in_file_samples[current_trigger_idx_in_file]
+    current_trigger_start_sample, _ = all_triggers_in_file_samples[current_trigger_idx_in_file]
     current_event_time_relative = current_trigger_start_sample / sampling_rate if sampling_rate > 0 else 0
 
-
-    # --- Plot 1: Full Processed Waveform with all triggers ---
+    # --- Plot 1: Full Processed Waveform ---
     axs[0].plot(times, waveform_data, label="Full Processed Waveform", color='C0', linewidth=0.7)
     axs[0].set_ylabel("Norm. Amplitude")
     axs[0].grid(True)
     axs[0].set_xlim(times[0], times[-1])
-
-    for i, (start_s, end_s) in enumerate(all_triggers_in_file_samples):
+    for i, (start_s, _) in enumerate(all_triggers_in_file_samples):
         event_time_rel = start_s / sampling_rate if sampling_rate > 0 else 0
         line_color = 'red' if i == current_trigger_idx_in_file else 'green'
         line_style = '-' if i == current_trigger_idx_in_file else '--'
-        line_width = 1.5 if i == current_trigger_idx_in_file else 1.0
-        alpha_val = 1.0 if i == current_trigger_idx_in_file else 0.6
-        axs[0].axvline(event_time_rel, color=line_color, linestyle=line_style, linewidth=line_width, alpha=alpha_val, label=f"Event {i+1}" if i == current_trigger_idx_in_file else None)
+        axs[0].axvline(event_time_rel, color=line_color, linestyle=line_style, linewidth=(1.5 if i == current_trigger_idx_in_file else 1.0), alpha=(1.0 if i == current_trigger_idx_in_file else 0.6), label=f"Event {i+1}" if i == current_trigger_idx_in_file else None)
     axs[0].legend(loc="upper right", fontsize='small')
 
-
-    # --- Plot 2: Zoomed-in Waveform around the current event ---
+    # --- Plot 2: Zoomed-in Waveform ---
     zoom_start_time = max(0, current_event_time_relative - ZOOM_WINDOW_SEC)
     zoom_end_time = min(times[-1], current_event_time_relative + ZOOM_WINDOW_SEC)
-
     axs[1].plot(times, waveform_data, label=f"Zoomed Waveform (+/- {ZOOM_WINDOW_SEC}s)", color='C0')
     axs[1].set_ylabel("Norm. Amplitude")
     axs[1].grid(True)
     axs[1].set_xlim(zoom_start_time, zoom_end_time)
-
-    # Add trigger lines to zoom plot, adjusting for visibility
-    for i, (start_s, end_s) in enumerate(all_triggers_in_file_samples):
+    for i, (start_s, _) in enumerate(all_triggers_in_file_samples):
         event_time_rel = start_s / sampling_rate if sampling_rate > 0 else 0
-        if zoom_start_time <= event_time_rel <= zoom_end_time: # Only plot if within zoom window
+        if zoom_start_time <= event_time_rel <= zoom_end_time:
             line_color = 'red' if i == current_trigger_idx_in_file else 'green'
             line_style = '-' if i == current_trigger_idx_in_file else '--'
-            line_width = 1.5 if i == current_trigger_idx_in_file else 1.0
-            alpha_val = 1.0 if i == current_trigger_idx_in_file else 0.6
-            axs[1].axvline(event_time_rel, color=line_color, linestyle=line_style, linewidth=line_width, alpha=alpha_val, label=f"Current Event {i+1}" if i == current_trigger_idx_in_file else f"Other Event {i+1}")
+            axs[1].axvline(event_time_rel, color=line_color, linestyle=line_style, linewidth=(1.5 if i == current_trigger_idx_in_file else 1.0), alpha=(1.0 if i == current_trigger_idx_in_file else 0.6), label=f"Current Evt {i+1}" if i == current_trigger_idx_in_file else f"Other Evt {i+1}")
     axs[1].legend(loc="upper right", fontsize='small')
 
-
-    # --- Plot 3: CFT (full view) ---
+    # --- Plot 3: CFT ---
     if cft_data is not None:
         cft_times = np.linspace(0, times[-1] if len(times) > 0 else 0, len(cft_data), endpoint=False)
         axs[2].plot(cft_times, cft_data, label="STA/LTA CFT", color='orange')
@@ -121,170 +120,212 @@ def display_and_label_event(
              axs[2].axhline(current_settings['thr_on'], color='magenta', linestyle=':', label=f"Thr_on={current_settings['thr_on']:.2f}")
         axs[2].set_ylabel("CFT Value")
         axs[2].grid(True)
-        axs[2].set_xlim(times[0], times[-1]) # Match full waveform x-axis
+        axs[2].set_xlim(times[0], times[-1])
         axs[2].legend(loc="upper right", fontsize='small')
 
-    axs[2].set_xlabel("Time (s) relative to trace start\nLabel: 'y' (Event), 'n' (Not), 's' (Skip), 'q' (Quit File), 'esc' (Quit All)")
+    xlabel_text = (
+        "Time (s) relative to trace start\n"
+        "Label: 'y'(Evt), 'n'(Not), 's'(Skip), 'q'(Quit File), 'esc'(Quit All)\n"
+        "Bulk Not Event: 'F5'(Next 5), 'F10'(Next 10), 'F12'(Next 20)"
+    )
+    axs[2].set_xlabel(xlabel_text)
 
     title_text = (f"File: {file_info} | Current Event (Red): {current_trigger_idx_in_file + 1} / {len(all_triggers_in_file_samples)}\n"
                   f"Relative Time of Current Event: {current_event_time_relative:.2f} s")
     fig.suptitle(title_text, fontsize=10)
-    plt.tight_layout(rect=[0, 0.02, 1, 0.95]) # Adjust for suptitle and xlabel
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95]) # Adjusted for longer xlabel
     plt.show()
 
-    return current_label
+    return current_label_or_action
 
+
+def add_event_to_catalog(filename, overall_id, day_idx, event_idx_in_day, rel_time_sec, label_val, catalog_list):
+    """Helper function to create and append event dict to catalog list."""
+    event_info = {
+        'filename': filename,
+        'overall_event_id': overall_id,
+        'day_index': day_idx,
+        'event_index_in_day': event_idx_in_day,
+        'relative_time_sec': rel_time_sec,
+        'label': label_val
+    }
+    catalog_list.append(event_info)
 
 def main():
-    global fig_open
+    global fig_open, current_label_or_action # current_label_or_action is key here
 
     mseed_files = sorted(glob.glob(MSEED_DATA_PATTERN))
     if not mseed_files:
-        print(f"No mseed files found matching pattern: {MSEED_DATA_PATTERN}")
+        print(f"No mseed files found: {MSEED_DATA_PATTERN}")
         return
 
     if MAX_FILES_TO_PROCESS is not None:
         mseed_files = mseed_files[:MAX_FILES_TO_PROCESS]
 
-    all_labeled_events_info = [] # This will store dicts for the final catalog
-    overall_event_index = 0 # Global index across all files
+    all_labeled_events_info = []
+    overall_event_index_counter = 0 # This will strictly increment for each catalog entry
 
     print("Starting interactive labeling...")
-    # ... (print instructions - same as before) ...
+    print("In the plot window, press:")
+    print("  'y' to label as EVENT")
+    print("  'n' to label as NOT EVENT")
+    print("  's' to SKIP this detected event")
+    print("  'q' to QUIT processing the current file")
+    print("  'escape' to QUIT the entire labeling process")
+    print("  'F5' to label this AND NEXT 4 events as NOT EVENT (total 5)")
+    print("  'F10' to label this AND NEXT 9 events as NOT EVENT (total 10)")
+    print("  'F12' to label this AND NEXT 19 events as NOT EVENT (total 20)")
+    print("-" * 30)
 
-    for day_index, mseed_filepath in enumerate(mseed_files): # day_index assumes one file per day
-        if not fig_open:
+
+    for day_idx, mseed_filepath in enumerate(mseed_files):
+        if not fig_open: # Quit all
             print("Quitting all files.")
             break
-        fig_open = True
+        # Reset fig_open for the new file if 'q' was pressed for the previous file
+        # but not 'escape' for quitting all.
+        if current_label_or_action == -2: # if previous action was quit file
+             fig_open = True
+        current_label_or_action = None # Reset action at the start of each file processing
 
-        print(f"\nProcessing Day {day_index + 1} (File {day_index + 1}/{len(mseed_files)}): {os.path.basename(mseed_filepath)}")
+
+        print(f"\nProcessing Day {day_idx + 1} (File {day_idx + 1}/{len(mseed_files)}): {os.path.basename(mseed_filepath)}")
 
         event_type = get_event_type_from_path(mseed_filepath)
         current_settings = get_settings(event_type)
-
         st = load_mseed_file(mseed_filepath)
         if not st or not st.traces:
-            print(f"  Could not load or no traces in: {mseed_filepath}. Skipping.")
+            print(f"  Could not load/no traces: {mseed_filepath}. Skipping.")
             continue
 
         original_trace = st[0].copy()
-        trace_starttime_utc = original_trace.stats.starttime # UTCDateTime object
+        # trace_starttime_utc = original_trace.stats.starttime
 
         try:
             low_f, high_f = calculate_best_freq_range_by_pwr(
-                original_trace.copy(),
-                current_settings['low_freq_point'],
-                current_settings['high_freq_point'],
-                current_settings['frequence_window']
+                original_trace.copy(), current_settings['low_freq_point'],
+                current_settings['high_freq_point'], current_settings['frequence_window']
             )
             print(f"  Using frequency range: {low_f:.1f} - {high_f:.1f} Hz")
         except Exception as e:
-            print(f"  Error in calculate_best_freq_range_by_pwr: {e}. Using default range.")
+            print(f"  Error in freq calculation: {e}. Using default.")
             low_f = current_settings['low_freq_point']
             high_f = current_settings['low_freq_point'] + current_settings['frequence_window']
 
         trace_processed = preprocess_trace(
-            original_trace.copy(),
-            low_f, high_f,
-            current_settings['resample'],
-            current_settings.get('df_resample'),
-            current_settings.get('clipping_std_factor')
+            original_trace.copy(), low_f, high_f, current_settings['resample'],
+            current_settings.get('df_resample'), current_settings.get('clipping_std_factor')
         )
-
-        trace_data_for_stalta = np.abs(trace_processed.data)
         sampling_rate = trace_processed.stats.sampling_rate
-        if sampling_rate == 0: # Should not happen with valid data
+        if sampling_rate == 0:
             print("  Error: Sampling rate is zero. Skipping file.")
             continue
 
         cft, on_off_indices = detect_triggers_sta_lta(
-            trace_data_for_stalta,
-            sampling_rate,
+            np.abs(trace_processed.data), sampling_rate,
             current_settings['sta_len'] / sampling_rate,
             current_settings['lta_len'] / sampling_rate,
             current_settings['thr_on']
         )
-
-        all_triggers_in_file_samples = on_off_indices.tolist() # List of [start_sample, end_sample]
-
+        all_triggers_in_file_samples = on_off_indices.tolist()
         min_duration_samples = int(2 * sampling_rate)
-        filtered_triggers_in_file_samples = [
+        filtered_triggers = [
             trig for trig in all_triggers_in_file_samples
             if (trig[1] - trig[0]) > min_duration_samples
         ]
 
-        if not filtered_triggers_in_file_samples:
+        if not filtered_triggers:
             print("  No suitable triggers found in this file after filtering.")
             continue
+        print(f"  Found {len(filtered_triggers)} potential events to label in this file.")
 
-        print(f"  Found {len(filtered_triggers_in_file_samples)} potential events to label in this file.")
+        # --- Loop through events in the current file ---
+        event_idx_in_day_loop = 0
+        while event_idx_in_day_loop < len(filtered_triggers):
+            if not fig_open and current_label_or_action == -2 : # Quit current file
+                break
+            if not fig_open and current_label_or_action == -3 : # Quit all
+                break
 
-        for event_index_in_day, current_trigger_samples in enumerate(filtered_triggers_in_file_samples):
-            if not fig_open:
-                break # from loop over triggers in current file
 
-            overall_event_index += 1
-            start_sample, _ = current_trigger_samples # We only need start for relative time here
+            current_trigger_samples = filtered_triggers[event_idx_in_day_loop]
+            start_sample, _ = current_trigger_samples
+            relative_time_sec = start_sample / sampling_rate
 
-            label = display_and_label_event(
-                trace_processed,
-                cft,
-                filtered_triggers_in_file_samples, # Pass all triggers for highlighting
-                event_index_in_day,                 # Index of the current one
-                os.path.basename(mseed_filepath),
-                current_settings
+            # Display the current event and get action
+            action = display_and_label_event(
+                trace_processed, cft, filtered_triggers,
+                event_idx_in_day_loop, os.path.basename(mseed_filepath), current_settings
             )
 
-            if label is None or label == -1:
-                print(f"    Event {event_index_in_day + 1} (Overall {overall_event_index}) skipped.")
-                overall_event_index -=1 # Decrement if skipped so next isn't misnumbered
+            if action is None or action == -1: # Skipped or closed window manually
+                print(f"    Event {event_idx_in_day_loop + 1} skipped.")
+                event_idx_in_day_loop += 1
                 continue
-            if label == -2:
+            if action == -2: # Quit current file
                 print(f"    Quitting file: {os.path.basename(mseed_filepath)}")
-                overall_event_index -=1 # Decrement as this event wasn't fully processed for catalog
-                break
-            if label == -3:
+                break # Breaks from while loop for this file
+            if action == -3: # Quit all
                 print(f"    Quitting all labeling.")
-                overall_event_index -=1
-                fig_open = False
+                fig_open = False # ensure outer loop also exits
                 break
 
-            # --- Catalog information ---
-            relative_time_sec = start_sample / sampling_rate
-            # absolute_time_utc = trace_starttime_utc + relative_time_sec # This is the P-wave arrival time
+            # Handle single event labeling
+            if isinstance(action, int) and action in [0, 1]:
+                overall_event_index_counter += 1
+                add_event_to_catalog(
+                    os.path.basename(mseed_filepath), overall_event_index_counter,
+                    day_idx + 1, event_idx_in_day_loop + 1,
+                    round(relative_time_sec, 3), action, all_labeled_events_info
+                )
+                print(f"    Event {event_idx_in_day_loop + 1} (Overall ID {overall_event_index_counter}) labeled as: {'EVENT' if action == 1 else 'NOT EVENT'}")
+                event_idx_in_day_loop += 1
 
-            event_info_for_catalog = {
-                'filename': os.path.basename(mseed_filepath),
-                'overall_event_id': overall_event_index, # Unique ID across all files
-                'day_index': day_index + 1, # 1-based index for the file/day
-                'event_index_in_day': event_index_in_day + 1, # 1-based index for event within its file
-                'relative_time_sec': round(relative_time_sec, 3), # Relative to start of mseed file
-                # 'absolute_time_utc': absolute_time_utc.strftime('%Y-%m-%dT%H:%M:%S.%fZ'), # Optional
-                'label': label # 0 or 1
-            }
-            all_labeled_events_info.append(event_info_for_catalog)
-            print(f"    Event {event_index_in_day + 1} (Overall {overall_event_index}) labeled as: {'EVENT' if label == 1 else 'NOT EVENT'}")
+            # Handle bulk labeling
+            elif isinstance(action, str) and action.startswith('bulk_0_'):
+                try:
+                    num_to_bulk_label = int(action.split('_')[-1])
+                    print(f"    Bulk labeling next {num_to_bulk_label} events (including current) as NOT EVENT.")
+                    for i in range(num_to_bulk_label):
+                        if event_idx_in_day_loop < len(filtered_triggers):
+                            overall_event_index_counter += 1
+                            current_bulk_trigger = filtered_triggers[event_idx_in_day_loop]
+                            current_bulk_start_sample, _ = current_bulk_trigger
+                            current_bulk_rel_time = current_bulk_start_sample / sampling_rate
+
+                            add_event_to_catalog(
+                                os.path.basename(mseed_filepath), overall_event_index_counter,
+                                day_idx + 1, event_idx_in_day_loop + 1,
+                                round(current_bulk_rel_time, 3), 0, # Label 0 for "not event"
+                                all_labeled_events_info
+                            )
+                            print(f"      Bulk: Event {event_idx_in_day_loop + 1} (Overall ID {overall_event_index_counter}) labeled as NOT EVENT.")
+                            event_idx_in_day_loop += 1
+                        else:
+                            print("      Reached end of events in file during bulk labeling.")
+                            break # Break from bulk labeling loop
+                    # After bulk, the main while loop will continue from the new event_idx_in_day_loop
+                except ValueError:
+                    print(f"    Error parsing bulk action: {action}. Skipping event.")
+                    event_idx_in_day_loop += 1 # Move to next to avoid infinite loop
+            else: # Should not happen with current on_key
+                print(f"    Unknown action: {action}. Skipping event.")
+                event_idx_in_day_loop += 1
+
 
     # After all files or quit
     if all_labeled_events_info:
-        print(f"\nLabeling complete.")
-        print(f"Collected {len(all_labeled_events_info)} labels.")
+        print(f"\nLabeling complete. Collected {len(all_labeled_events_info)} labels.")
         output_dir = os.path.dirname(MSEED_DATA_PATTERN) if MSEED_DATA_PATTERN.endswith("*.mseed") else "."
-        if not output_dir: output_dir = "." # Fallback if pattern is just "*.mseed"
+        if not output_dir: output_dir = "."
         output_path = os.path.join(output_dir, OUTPUT_CATALOG_FILENAME)
-
         if not os.path.exists(os.path.dirname(output_path)) and os.path.dirname(output_path) != '':
              os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-        catalog_columns = [
-            'filename', 'overall_event_id', 'day_index', 'event_index_in_day',
-            'relative_time_sec', 'label' # Removed 'absolute_time_utc' for now, add back if needed
-        ]
+        catalog_columns = ['filename', 'overall_event_id', 'day_index', 'event_index_in_day', 'relative_time_sec', 'label']
         save_event_catalog(all_labeled_events_info, output_path, catalog_columns)
     else:
         print("\nNo events were labeled.")
-
 
 if __name__ == "__main__":
     main()
