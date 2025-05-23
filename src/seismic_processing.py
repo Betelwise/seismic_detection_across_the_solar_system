@@ -13,28 +13,52 @@ def load_mseed_file(filepath):
         print(f"Error loading {filepath}: {e}")
         return None
 
-def preprocess_trace(trace, min_freq, max_freq, do_resample=False, resample_rate=None, clip_std_factor=None):
-    """Applies bandpass filter, optional resampling, clipping, and normalization."""
-    tr_filt = trace.copy()
-    tr_filt.filter('bandpass', freqmin=min_freq, freqmax=max_freq, zerophase=True) # Added zerophase
+def preprocess_trace(
+    trace,
+    min_freq,
+    max_freq,
+    do_resample=True,
+    resample_rate=6.625,
+    clip_std_factor=None
+):
+    """Applies bandpass filter, optional resampling, clipping, and normalization.
+       First computes best freq range by power, then filters."""
+    # 1) find best frequency band
+    freq_window = max_freq - min_freq
+    best_min, best_max = calculate_best_freq_range_by_pwr(
+        trace.copy(), min_freq, max_freq, freq_window
+    )
 
+    # 2) apply bandpass with best range
+    tr_filt = trace.copy()
+    tr_filt.filter('bandpass',
+                   freqmin=best_min,
+                   freqmax=best_max,
+                   zerophase=True)
+
+    # 3) optional resample
     if do_resample and resample_rate:
         tr_filt.resample(resample_rate)
+        print(f"Resampled trace to {resample_rate} Hz")
 
+    # 4) clipping
     tr_data = tr_filt.data
-
     if clip_std_factor:
         stddev = np.std(tr_data)
-        threshold = clip_std_factor * stddev
-        tr_data[np.abs(tr_data) > threshold] = np.sign(tr_data[np.abs(tr_data) > threshold]) * threshold # Clip instead of setting to stddev
+        thr = clip_std_factor * stddev
+        mask = np.abs(tr_data) > thr
+        tr_data[mask] = np.sign(tr_data[mask]) * thr
 
-    # Normalize between -1 and 1
-    if np.ptp(tr_data) > 0: # Avoid division by zero if data is flat
-        tr_data_normalized = 2 * (tr_data - np.min(tr_data)) / np.ptp(tr_data) - 1
+    # 5) normalize
+    if np.ptp(tr_data) > 0:
+        tr_data = 2 * (tr_data - np.min(tr_data)) / np.ptp(tr_data) - 1
     else:
-        tr_data_normalized = np.zeros_like(tr_data)
+        tr_data = np.zeros_like(tr_data)
 
-    tr_filt.data = tr_data_normalized # Update trace data
+    tr_filt.data = tr_data
+    # 6) attach the used range and return
+    tr_filt.stats.filter_freq_range = (best_min, best_max)
+
     return tr_filt
 
 
