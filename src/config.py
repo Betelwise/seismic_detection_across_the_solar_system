@@ -29,7 +29,7 @@ def get_event_type_from_path(filepath):
         return 'moon'
     elif 'mars' in filepath:
         return 'mars'
-    return 'moon' # Default
+    return None # Default
 
 def get_settings(event_type):
     return settings.get(event_type, settings['moon'])

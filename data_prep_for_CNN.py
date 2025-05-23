@@ -11,6 +11,14 @@ CATALOG_FILENAME = 'catalog.csv'      # Name of the catalog file inside each sub
 TRACE_NPA_DIR_NAME = 'trace_npa'      # Output folder for trace numpy arrays
 AUX_NPA_DIR_NAME = 'aux_npa'          # Output folder for auxiliary numpy arrays
 
+from src.config import get_event_type_from_path, get_settings
+from src.seismic_processing import (
+    load_mseed_file,
+    preprocess_trace,
+    calculate_best_freq_range_by_pwr,
+    detect_triggers_sta_lta
+)
+
 # Define the fixed length for the data and the desired sampling rate for processing
 # This fixed_length should correspond to 14 minutes of data AT THE TARGET SAMPLING RATE
 TARGET_SAMPLING_RATE_HZ = 6.625  # Desired sampling rate for all processed traces (Hz)
@@ -21,13 +29,16 @@ TIME_BEFORE_EVENT_SEC = 4 * 60 # 4 minutes before the event for slicing
 TIME_AFTER_EVENT_SEC = 10 * 60 # 10 minutes after the event for slicing
 
 # --- Helper Function ---
-def process_and_save_data(mseed_filepath, relative_event_time_sec, filter_low, filter_high, label, output_trace_path, output_aux_path):
+def process_and_save_data(
+        mseed_filepath, 
+        relative_event_time_sec, 
+        ):
     """
     Processes a single event from an mseed file and saves the trace and auxiliary data.
     Returns True if successful, False otherwise.
     """
     try:
-        st = read(mseed_filepath)
+        st = load_mseed_file(mseed_filepath)
         if not st:
             print(f"  Warning: Could not read or empty stream: {mseed_filepath}")
             return None, None # Indicate failure to process this event
@@ -35,30 +46,42 @@ def process_and_save_data(mseed_filepath, relative_event_time_sec, filter_low, f
         # Ensure single trace (or select the appropriate one if multiple)
         if len(st) > 1:
             print(f"  Warning: Multiple traces in {mseed_filepath}. Using the first one.")
-        tr = st[0].copy() # Work with a copy
+        # tr = st[0].copy() # Work with a copy
 
-        # 0. Resample to target sampling rate BEFORE any other processing
-        # This ensures all snippets have consistent timing and length calculations
-        if tr.stats.sampling_rate != TARGET_SAMPLING_RATE_HZ:
-            try:
-                print(f"    Resampling {mseed_filepath} from {tr.stats.sampling_rate} Hz to {TARGET_SAMPLING_RATE_HZ} Hz.")
-                tr.resample(TARGET_SAMPLING_RATE_HZ)
-            except Exception as e:
-                print(f"  Error resampling {mseed_filepath}: {e}. Skipping event.")
-                return None, None
+        # # 0. Resample to target sampling rate BEFORE any other processing
+        # # This ensures all snippets have consistent timing and length calculations
+        # if tr.stats.sampling_rate != TARGET_SAMPLING_RATE_HZ:
+        #     try:
+        #         print(f"    Resampling {mseed_filepath} from {tr.stats.sampling_rate} Hz to {TARGET_SAMPLING_RATE_HZ} Hz.")
+        #         tr.resample(TARGET_SAMPLING_RATE_HZ)
+        #     except Exception as e:
+        #         print(f"  Error resampling {mseed_filepath}: {e}. Skipping event.")
+        #         return None, None
         
         # Recalculate relative_event_time_samples based on the new TARGET_SAMPLING_RATE_HZ
         # This is important if the original mseed had a different rate
         # relative_event_time_samples_at_target_sr = int(relative_event_time_sec * TARGET_SAMPLING_RATE_HZ)
 
-
-        # 1. Apply bandpass filter
-        try:
-            tr_filtered = tr.copy() # Filter on a new copy after resampling
-            tr_filtered.filter('bandpass', freqmin=filter_low, freqmax=filter_high, zerophase=True)
-        except Exception as e:
-            print(f"  Error filtering {mseed_filepath} for event at {relative_event_time_sec}s: {e}")
+        event_type = get_event_type_from_path(mseed_filepath)
+        if event_type is None:
+            print(f"  Warning: Could not determine event type from path: {mseed_filepath}. Skipping.")
             return None, None
+        current_settings = get_settings(event_type)
+        original_trace = st[0].copy()
+
+        try:
+            low_f, high_f = calculate_best_freq_range_by_pwr(
+                original_trace.copy(), current_settings['low_freq_point'],
+                current_settings['high_freq_point'], current_settings['frequence_window']
+            )
+        except Exception: # Fallback
+            low_f = current_settings['low_freq_point']
+            high_f = current_settings['low_freq_point'] + current_settings['frequence_window']
+
+        tr_filtered = preprocess_trace(
+            original_trace.copy(), low_f, high_f, current_settings['resample'],
+            current_settings.get('df_resample'), current_settings.get('clipping_std_factor')
+        )
 
         # 2. Define the slice window based on relative_event_time_sec
         # The times are relative to the START of the (potentially resampled) trace
@@ -66,7 +89,7 @@ def process_and_save_data(mseed_filepath, relative_event_time_sec, filter_low, f
         slice_end_sec_rel = relative_event_time_sec + TIME_AFTER_EVENT_SEC
 
         # Ensure slice times are within trace bounds
-        trace_duration_sec = tr.stats.npts / tr.stats.sampling_rate
+        trace_duration_sec = tr_filtered.stats.npts / tr_filtered.stats.sampling_rate
         slice_start_sec_rel = max(0, slice_start_sec_rel)
         slice_end_sec_rel = min(trace_duration_sec, slice_end_sec_rel)
 
@@ -201,7 +224,7 @@ def main():
                 # Assuming 'filename' in catalog does NOT have .mseed extension
                 # And that mseed files are directly in source_folder_path
                 base_mseed_filename = row['filename']
-                mseed_filepath = os.path.join(source_folder_path, f"{base_mseed_filename}") # Add .mseed
+                mseed_filepath = os.path.join(source_folder_path, f"{base_mseed_filename}")
                 
                 # If your catalog's 'filename' column ALREADY includes '.mseed' then use:
                 # mseed_filepath = os.path.join(source_folder_path, row['filename'])
@@ -209,20 +232,6 @@ def main():
 
                 relative_event_time_sec = float(row['relative_time_sec'])
                 label = int(row['label'])
-                
-                # Get filter frequencies. If not in catalog, use defaults or skip.
-                # This depends on what your HTML generator's catalog includes.
-                # For now, let's assume they are NOT in the HTML catalog and we need
-                # to determine them or use fixed ones.
-                # If you have 'filter_low_hz' and 'filter_high_hz' in catalog.csv from HTML:
-                if 'filter_low_hz' in df_catalog.columns and 'filter_high_hz' in df_catalog.columns:
-                    filter_low = float(row['filter_low_hz'])
-                    filter_high = float(row['filter_high_hz'])
-                else:
-                    # Fallback: use some default or skip if filters are critical
-                    print(f"    Warning: Filter frequencies not in catalog for {base_mseed_filename}. Using defaults 0.1-10 Hz.")
-                    filter_low = 0.1 # Example default
-                    filter_high = 10.0 # Example default
 
             except KeyError as e:
                 print(f"  Missing expected column {e} in catalog {catalog_path} at row {idx}. Skipping this event.")
@@ -252,11 +261,6 @@ def main():
             trace_data_np, aux_data_np = process_and_save_data(
                 mseed_filepath,
                 relative_event_time_sec,
-                filter_low,
-                filter_high,
-                label, # Label passed but not used directly in process_and_save_data
-                output_trace_filepath,
-                output_aux_filepath
             )
 
             if trace_data_np is not None and aux_data_np is not None:

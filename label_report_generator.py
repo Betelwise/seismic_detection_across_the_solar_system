@@ -18,11 +18,11 @@ from src.seismic_processing import (
 # No file_utils.save_event_catalog needed here, JS will handle output format
 
 # --- Configuration ---
-MSEED_DATA_PATTERN = './old_src/data/lunar/training/data/S16_GradeB/*.mseed'
+MSEED_DATA_PATTERN = 'data/training/lunar/*.mseed'
 OUTPUT_HTML_FILE = "seismic_labeling_report.html"
 IMAGE_OUTPUT_DIR = "labeling_images" # To store generated PNGs
 SNIPPET_WINDOW_SEC = 1*60*60 # Seconds before/after event for snippet plot
-MAX_FILES_TO_PROCESS = None # For testing
+MAX_FILES_TO_PROCESS = 1 # For testing
 
 # Ensure image output directory exists
 os.makedirs(IMAGE_OUTPUT_DIR, exist_ok=True)
