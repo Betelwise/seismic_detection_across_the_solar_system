@@ -1,0 +1,6 @@
+
+
+labeling_images/
+
+# Ignore mseed files
+*.mseed
