@@ -17,14 +17,13 @@ def preprocess_trace(
     trace,
     min_freq,
     max_freq,
-    do_resample=True,
+    freq_window,
     resample_rate=6.625,
     clip_std_factor=None
 ):
     """Applies bandpass filter, optional resampling, clipping, and normalization.
        First computes best freq range by power, then filters."""
     # 1) find best frequency band
-    freq_window = max_freq - min_freq
     best_min, best_max = calculate_best_freq_range_by_pwr(
         trace.copy(), min_freq, max_freq, freq_window
     )
@@ -35,9 +34,9 @@ def preprocess_trace(
                    freqmin=best_min,
                    freqmax=best_max,
                    zerophase=True)
-
+    sampling_rate = tr_filt.stats.sampling_rate
     # 3) optional resample
-    if do_resample and resample_rate:
+    if resample_rate < sampling_rate:
         tr_filt.resample(resample_rate)
         print(f"Resampled trace to {resample_rate} Hz")
 

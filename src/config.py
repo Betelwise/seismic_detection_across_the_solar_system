@@ -7,7 +7,6 @@ settings = {
         'sta_len': 100,
         'lta_len': 1000,
         'thr_on': 3.0, # Make sure this is a float
-        'resample': False,
         'df_resample': 6.625, # Add sampling rate if resampling
         'clipping_std_factor': 26, # For clipping outliers
     },
@@ -18,7 +17,6 @@ settings = {
         'sta_len': 20,
         'lta_len': 80,
         'thr_on': 2.1,
-        'resample': True,
         'df_resample': 6.625, # Example, adjust as needed
         'clipping_std_factor': 26,
     }

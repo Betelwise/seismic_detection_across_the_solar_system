@@ -8,8 +8,7 @@ import glob
 # --- Configuration ---
 BASE_TRAINING_DIR = './data/training' # Root directory containing 'lunar', 'mars', etc.
 CATALOG_FILENAME = 'catalog.csv'      # Name of the catalog file inside each subfolder
-TRACE_NPA_DIR_NAME = 'trace_npa'      # Output folder for trace numpy arrays
-AUX_NPA_DIR_NAME = 'aux_npa'          # Output folder for auxiliary numpy arrays
+fixed_length = 5565
 
 from src.config import get_event_type_from_path, get_settings
 from src.seismic_processing import (
@@ -38,29 +37,11 @@ def process_and_save_data(
     Returns True if successful, False otherwise.
     """
     try:
-        st = load_mseed_file(mseed_filepath)
+        # st = load_mseed_file(mseed_filepath)
+        st = read(mseed_filepath)
         if not st:
             print(f"  Warning: Could not read or empty stream: {mseed_filepath}")
             return None, None # Indicate failure to process this event
-
-        # Ensure single trace (or select the appropriate one if multiple)
-        if len(st) > 1:
-            print(f"  Warning: Multiple traces in {mseed_filepath}. Using the first one.")
-        # tr = st[0].copy() # Work with a copy
-
-        # # 0. Resample to target sampling rate BEFORE any other processing
-        # # This ensures all snippets have consistent timing and length calculations
-        # if tr.stats.sampling_rate != TARGET_SAMPLING_RATE_HZ:
-        #     try:
-        #         print(f"    Resampling {mseed_filepath} from {tr.stats.sampling_rate} Hz to {TARGET_SAMPLING_RATE_HZ} Hz.")
-        #         tr.resample(TARGET_SAMPLING_RATE_HZ)
-        #     except Exception as e:
-        #         print(f"  Error resampling {mseed_filepath}: {e}. Skipping event.")
-        #         return None, None
-        
-        # Recalculate relative_event_time_samples based on the new TARGET_SAMPLING_RATE_HZ
-        # This is important if the original mseed had a different rate
-        # relative_event_time_samples_at_target_sr = int(relative_event_time_sec * TARGET_SAMPLING_RATE_HZ)
 
         event_type = get_event_type_from_path(mseed_filepath)
         if event_type is None:
@@ -69,115 +50,47 @@ def process_and_save_data(
         current_settings = get_settings(event_type)
         original_trace = st[0].copy()
 
-        try:
-            low_f, high_f = calculate_best_freq_range_by_pwr(
-                original_trace.copy(), current_settings['low_freq_point'],
-                current_settings['high_freq_point'], current_settings['frequence_window']
-            )
-        except Exception: # Fallback
-            low_f = current_settings['low_freq_point']
-            high_f = current_settings['low_freq_point'] + current_settings['frequence_window']
-
+        # 1. Preprocess the trace: bandpass filter, resample, clip, normalize
         tr_filtered = preprocess_trace(
-            original_trace.copy(), low_f, high_f, current_settings['resample'],
-            current_settings.get('df_resample'), current_settings.get('clipping_std_factor')
+            original_trace.copy(), 
+            current_settings.get('low_freq_point'), 
+            current_settings.get('high_freq_point'), 
+            current_settings.get('frequence_window'),
+            current_settings.get('df_resample'), 
+            current_settings.get('clipping_std_factor')
         )
 
         # 2. Define the slice window based on relative_event_time_sec
         # The times are relative to the START of the (potentially resampled) trace
         slice_start_sec_rel = relative_event_time_sec - TIME_BEFORE_EVENT_SEC
         slice_end_sec_rel = relative_event_time_sec + TIME_AFTER_EVENT_SEC
+        # Cut the data from start_time to end_time
+        sliced_st = tr_filtered.slice(starttime=st[0].stats.starttime + slice_start_sec_rel, 
+                                    endtime=st[0].stats.starttime + slice_end_sec_rel)
+        # Normalize the sliced data (mean=0, std=1)
+        sliced_data = np.atleast_1d(sliced_st[0].data)
+        sliced_data_normalized = (sliced_data - np.mean(sliced_data)) / np.std(sliced_data)
 
-        # Ensure slice times are within trace bounds
-        trace_duration_sec = tr_filtered.stats.npts / tr_filtered.stats.sampling_rate
-        slice_start_sec_rel = max(0, slice_start_sec_rel)
-        slice_end_sec_rel = min(trace_duration_sec, slice_end_sec_rel)
-
-        if slice_start_sec_rel >= slice_end_sec_rel:
-            print(f"  Warning: Invalid slice window for {mseed_filepath} (event at {relative_event_time_sec}s). "
-                  f"Start: {slice_start_sec_rel}, End: {slice_end_sec_rel}. Skipping.")
-            return None, None
-
-        # Slice the filtered trace
-        # Obspy's slice uses absolute UTCDateTime objects
-        abs_trace_starttime = tr_filtered.stats.starttime # This is a UTCDateTime object
-        abs_slice_starttime = abs_trace_starttime + slice_start_sec_rel
-        abs_slice_endtime = abs_trace_starttime + slice_end_sec_rel
+        # Calculate standard deviation before and after time_rel
+        before_data = tr_filtered.slice(starttime=st[0].stats.starttime + slice_start_sec_rel, 
+                                        endtime=st[0].stats.starttime + relative_event_time_sec)
+        after_data = tr_filtered.slice(starttime=st[0].stats.starttime + relative_event_time_sec, 
+                                        endtime=st[0].stats.starttime + slice_end_sec_rel)
         
-        tr_sliced = tr_filtered.slice(starttime=abs_slice_starttime, endtime=abs_slice_endtime)
+        std_before = np.std(before_data[0].data)
+        std_after = np.std(after_data[0].data)
 
-        if not tr_sliced or not tr_sliced[0].data.any(): # Check if slice is empty or all zeros
-            print(f"  Warning: Slice resulted in empty or zero trace for {mseed_filepath} (event at {relative_event_time_sec}s). Skipping.")
-            return None, None
-        
-        sliced_data = tr_sliced[0].data.astype(np.float32) # Ensure float32 for consistency
-
-        # 3. Normalize the sliced data (mean=0, std=1)
-        mean_val = np.mean(sliced_data)
-        std_val = np.std(sliced_data)
-        if std_val == 0: # Avoid division by zero for flat traces
-            sliced_data_normalized = np.zeros_like(sliced_data)
-            print(f"  Warning: Std dev of sliced data is 0 for {mseed_filepath} (event at {relative_event_time_sec}s). Using zeros.")
+        # Pad or truncate the data to the fixed length
+        if len(sliced_data_normalized) > fixed_length:
+            sliced_data_normalized = sliced_data_normalized[:fixed_length]
         else:
-            sliced_data_normalized = (sliced_data - mean_val) / std_val
-
-        # 4. Pad or truncate to FIXED_LENGTH_SAMPLES
-        current_len = len(sliced_data_normalized)
-        if current_len > FIXED_LENGTH_SAMPLES:
-            # Truncate: Take a window centered around the expected relative event position within the slice
-            # Event was at TIME_BEFORE_EVENT_SEC into the slice_start_sec_rel
-            # So, its position in the `sliced_data_normalized` array is roughly:
-            event_pos_in_slice = int(TIME_BEFORE_EVENT_SEC * TARGET_SAMPLING_RATE_HZ)
-            
-            # Adjust event_pos_in_slice if slice_start_sec_rel was pushed to 0
-            if slice_start_sec_rel == 0:
-                 event_pos_in_slice = int(relative_event_time_sec * TARGET_SAMPLING_RATE_HZ)
+            sliced_data_normalized = np.pad(sliced_data_normalized, (0, fixed_length - len(sliced_data_normalized)), 'constant')
 
 
-            start_idx_truncate = max(0, event_pos_in_slice - FIXED_LENGTH_SAMPLES // 2)
-            end_idx_truncate = start_idx_truncate + FIXED_LENGTH_SAMPLES
-            
-            # Ensure we don't go out of bounds if event is too close to start/end of a short slice
-            if end_idx_truncate > current_len:
-                end_idx_truncate = current_len
-                start_idx_truncate = max(0, end_idx_truncate - FIXED_LENGTH_SAMPLES)
-
-            processed_trace_data = sliced_data_normalized[start_idx_truncate:end_idx_truncate]
-            # If still not FIXED_LENGTH_SAMPLES (e.g. original slice was too short), pad
-            if len(processed_trace_data) < FIXED_LENGTH_SAMPLES:
-                 processed_trace_data = np.pad(processed_trace_data, (0, FIXED_LENGTH_SAMPLES - len(processed_trace_data)), 'constant')
-
-        elif current_len < FIXED_LENGTH_SAMPLES:
-            processed_trace_data = np.pad(sliced_data_normalized, (0, FIXED_LENGTH_SAMPLES - current_len), 'constant')
-        else:
-            processed_trace_data = sliced_data_normalized
-        
-        if len(processed_trace_data) != FIXED_LENGTH_SAMPLES:
-            print(f"  FATAL ERROR: Final trace length {len(processed_trace_data)} != {FIXED_LENGTH_SAMPLES} for {mseed_filepath}. This should not happen.")
-            return None, None
-
-
-        # 5. Calculate auxiliary data (std dev before and after event within the *original* slice)
-        # The event time relative to the *start of the slice* is TIME_BEFORE_EVENT_SEC
-        # (unless the slice was truncated at the beginning of the file)
-        
-        event_index_in_slice = int(TIME_BEFORE_EVENT_SEC * TARGET_SAMPLING_RATE_HZ)
-        if slice_start_sec_rel == 0: # If the slice started at the beginning of the file
-            event_index_in_slice = int(relative_event_time_sec * TARGET_SAMPLING_RATE_HZ)
-        
-        event_index_in_slice = min(event_index_in_slice, len(sliced_data) -1) # Cap at end of data
-        event_index_in_slice = max(0, event_index_in_slice) # Ensure non-negative
-
-
-        data_before_event_in_slice = sliced_data[:event_index_in_slice]
-        data_after_event_in_slice = sliced_data[event_index_in_slice:]
-
-        std_before = np.std(data_before_event_in_slice) if len(data_before_event_in_slice) > 0 else 0.0
-        std_after = np.std(data_after_event_in_slice) if len(data_after_event_in_slice) > 0 else 0.0
         
         aux_data_array = np.array([std_before, std_after], dtype=np.float32)
 
-        return processed_trace_data, aux_data_array
+        return sliced_data_normalized, aux_data_array
 
     except Exception as e:
         print(f"  Unhandled error processing event from {mseed_filepath} at {relative_event_time_sec}s: {e}")
@@ -195,6 +108,10 @@ def main():
         return
 
     for source_folder_path in source_type_folders:
+        # Create empty lists to store the data and labels
+        data_list = []
+        labels = []
+        aux_data_list = []  # To store auxiliary data (std dev before and after)
         source_name = os.path.basename(source_folder_path)
         print(f"\nProcessing source type: {source_name}")
 
@@ -204,11 +121,8 @@ def main():
             continue
 
         # Create output directories if they don't exist
-        output_trace_dir = os.path.join(source_folder_path, TRACE_NPA_DIR_NAME)
-        output_aux_dir = os.path.join(source_folder_path, AUX_NPA_DIR_NAME)
-        os.makedirs(output_trace_dir, exist_ok=True)
-        os.makedirs(output_aux_dir, exist_ok=True)
-
+        output_np_dir = os.path.join(source_folder_path, "np_arrays")
+        os.makedirs(output_np_dir, exist_ok=True)
         try:
             df_catalog = pd.read_csv(catalog_path)
         except Exception as e:
@@ -221,15 +135,8 @@ def main():
         for idx, row in df_catalog.iterrows():
             # Ensure columns exist, handle potential missing columns gracefully
             try:
-                # Assuming 'filename' in catalog does NOT have .mseed extension
-                # And that mseed files are directly in source_folder_path
                 base_mseed_filename = row['filename']
                 mseed_filepath = os.path.join(source_folder_path, f"{base_mseed_filename}")
-                
-                # If your catalog's 'filename' column ALREADY includes '.mseed' then use:
-                # mseed_filepath = os.path.join(source_folder_path, row['filename'])
-
-
                 relative_event_time_sec = float(row['relative_time_sec'])
                 label = int(row['label'])
 
@@ -243,18 +150,11 @@ def main():
 
             if not os.path.exists(mseed_filepath):
                 print(f"  Mseed file not found: {mseed_filepath} (referenced in catalog at row {idx}). Skipping this event.")
-                continue
+                continue      
 
-            # Define unique output filenames for each event's .npy files
-            # Using overall_event_id if it exists, otherwise a combination
-            if 'overall_event_id' in row:
-                output_file_prefix = f"event_{row['overall_event_id']:06d}"
-            else: # Fallback if overall_event_id is not in the catalog
-                output_file_prefix = f"{os.path.splitext(base_mseed_filename)[0]}_day{row.get('day_index',0)}_evt{row.get('event_index_in_day',idx)}"
-
-            output_trace_filepath = os.path.join(output_trace_dir, f"{output_file_prefix}_trace.npy")
-            output_aux_filepath = os.path.join(output_aux_dir, f"{output_file_prefix}_aux.npy")
-            output_label_filepath = os.path.join(output_aux_dir, f"{output_file_prefix}_label.npy") # Save label too
+            # output_trace_filepath = os.path.join(output_trace_dir, f"{output_file_prefix}_trace.npy")
+            # output_aux_filepath = os.path.join(output_aux_dir, f"{output_file_prefix}_aux.npy")
+            # output_label_filepath = os.path.join(output_aux_dir, f"{output_file_prefix}_label.npy") # Save label too
 
             print(f"    Processing event {idx+1}/{len(df_catalog)} from {base_mseed_filename} at {relative_event_time_sec:.2f}s...")
             
@@ -264,15 +164,36 @@ def main():
             )
 
             if trace_data_np is not None and aux_data_np is not None:
-                np.save(output_trace_filepath, trace_data_np)
-                np.save(output_aux_filepath, aux_data_np)
-                np.save(output_label_filepath, np.array([label], dtype=np.int8)) # Save label as a separate file
+                data_list.append(trace_data_np)
+                aux_data_list.append(aux_data_np)
+                labels.append(label)
+                # np.save(output_trace_filepath, trace_data_np)
+                # np.save(output_aux_filepath, aux_data_np)
+                # np.save(output_label_filepath, np.array([label], dtype=np.int8)) # Save label as a separate file
                 successful_events +=1
                 # print(f"      Saved: {output_trace_filepath}, {output_aux_filepath}, {output_label_filepath}")
             else:
                 print(f"      Failed to process event {idx+1} from {base_mseed_filename}.")
         
-        print(f"  Successfully processed and saved {successful_events} events for {source_name}.")
+        # Save all processed data for this source type
+        if data_list:
+            data_array = np.array(data_list, dtype=np.float32)
+            aux_data_array = np.array(aux_data_list, dtype=np.float32)
+            labels_array = np.array(labels, dtype=np.int8)
+
+            # Save the processed data
+            output_trace_filepath = os.path.join(output_np_dir, f"{source_name}_data.npy")
+            output_aux_filepath = os.path.join(output_np_dir, f"{source_name}_aux.npy")
+            output_labels_filepath = os.path.join(output_np_dir, f"{source_name}_labels.npy")
+
+            np.save(output_trace_filepath, data_array)
+            np.save(output_aux_filepath, aux_data_array)
+            np.save(output_labels_filepath, labels_array)
+
+            print(f"  Successfully saved {len(data_list)} events for {source_name}.")
+        else:
+            print(f"  No valid events processed for {source_name}.")
+        
 
     print("\nAll processing finished.")
 
