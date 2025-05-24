@@ -1,0 +1,944 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Seismic Event Labeling</title>
+        <style>
+            body { font-family: sans-serif; margin: 20px; }
+            .day-section { border: 1px solid #ccc; margin-bottom: 20px; padding: 10px; }
+            .day-header { font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }
+            .daily-context-img { max-width: 100%; border: 1px solid lightgray; margin-bottom:10px;}
+            .detections-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+            .detection-item { border: 1px solid #eee; padding: 5px; width: 220px; /* Adjust as needed */ }
+            .detection-item img { max-width: 200px; height: auto; display: block; margin-bottom: 5px; }
+            .detection-item label { display: block; margin-top: 5px; }
+            .controls { margin-top: 20px; margin-bottom: 20px; padding: 10px; border: 1px solid blue; }
+            textarea { width: 100%; height: 200px; margin-top:10px;}
+        </style>
+    </head>
+    <body>
+        <h1>Seismic Event Labeling Tool</h1>
+        <div class="controls">
+            <button onclick="generateCatalog()">Generate Catalog CSV</button>
+            <p>Instructions: Check the box for events you consider positive (earthquakes). All unchecked items will be labeled as 'not event' (0).</p>
+            <textarea id="csvOutput" placeholder="CSV output will appear here..."></textarea>
+        </div>
+    <div class='day-section'>
+  <div class='day-header'>File: xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed (Day 1)</div>
+  <img src='labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_daily.png' alt='Daily context for xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed' class='daily-context-img'>
+  <div class='detections-grid'>
+
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="1"
+             data-relative-time-sec="1115.623">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e0.png" alt="Snippet for event at 1115.62s">
+            <span>Time: 1115.62s (Evt 1)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="2"
+             data-relative-time-sec="1632.0">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e1.png" alt="Snippet for event at 1632.00s">
+            <span>Time: 1632.00s (Evt 2)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="3"
+             data-relative-time-sec="1737.509">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e2.png" alt="Snippet for event at 1737.51s">
+            <span>Time: 1737.51s (Evt 3)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="4"
+             data-relative-time-sec="4710.038">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e3.png" alt="Snippet for event at 4710.04s">
+            <span>Time: 4710.04s (Evt 4)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="5"
+             data-relative-time-sec="5290.113">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e4.png" alt="Snippet for event at 5290.11s">
+            <span>Time: 5290.11s (Evt 5)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="6"
+             data-relative-time-sec="5315.321">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e5.png" alt="Snippet for event at 5315.32s">
+            <span>Time: 5315.32s (Evt 6)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="7"
+             data-relative-time-sec="6961.208">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e6.png" alt="Snippet for event at 6961.21s">
+            <span>Time: 6961.21s (Evt 7)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="8"
+             data-relative-time-sec="6992.302">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e7.png" alt="Snippet for event at 6992.30s">
+            <span>Time: 6992.30s (Evt 8)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="9"
+             data-relative-time-sec="7175.396">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e8.png" alt="Snippet for event at 7175.40s">
+            <span>Time: 7175.40s (Evt 9)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="10"
+             data-relative-time-sec="10126.34">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e9.png" alt="Snippet for event at 10126.34s">
+            <span>Time: 10126.34s (Evt 10)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="11"
+             data-relative-time-sec="10148.981">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e10.png" alt="Snippet for event at 10148.98s">
+            <span>Time: 10148.98s (Evt 11)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="12"
+             data-relative-time-sec="10398.34">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e11.png" alt="Snippet for event at 10398.34s">
+            <span>Time: 10398.34s (Evt 12)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="13"
+             data-relative-time-sec="18094.792">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e12.png" alt="Snippet for event at 18094.79s">
+            <span>Time: 18094.79s (Evt 13)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="14"
+             data-relative-time-sec="18150.34">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e13.png" alt="Snippet for event at 18150.34s">
+            <span>Time: 18150.34s (Evt 14)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="15"
+             data-relative-time-sec="18361.962">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e14.png" alt="Snippet for event at 18361.96s">
+            <span>Time: 18361.96s (Evt 15)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="16"
+             data-relative-time-sec="18400.755">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e15.png" alt="Snippet for event at 18400.76s">
+            <span>Time: 18400.76s (Evt 16)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="17"
+             data-relative-time-sec="19016.151">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e16.png" alt="Snippet for event at 19016.15s">
+            <span>Time: 19016.15s (Evt 17)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="18"
+             data-relative-time-sec="19259.472">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e17.png" alt="Snippet for event at 19259.47s">
+            <span>Time: 19259.47s (Evt 18)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="19"
+             data-relative-time-sec="19598.792">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e18.png" alt="Snippet for event at 19598.79s">
+            <span>Time: 19598.79s (Evt 19)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="20"
+             data-relative-time-sec="20530.566">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e19.png" alt="Snippet for event at 20530.57s">
+            <span>Time: 20530.57s (Evt 20)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="21"
+             data-relative-time-sec="20575.245">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e20.png" alt="Snippet for event at 20575.24s">
+            <span>Time: 20575.24s (Evt 21)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="22"
+             data-relative-time-sec="20604.377">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e21.png" alt="Snippet for event at 20604.38s">
+            <span>Time: 20604.38s (Evt 22)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="23"
+             data-relative-time-sec="21125.887">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e22.png" alt="Snippet for event at 21125.89s">
+            <span>Time: 21125.89s (Evt 23)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="24"
+             data-relative-time-sec="21235.774">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e23.png" alt="Snippet for event at 21235.77s">
+            <span>Time: 21235.77s (Evt 24)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="25"
+             data-relative-time-sec="21401.208">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e24.png" alt="Snippet for event at 21401.21s">
+            <span>Time: 21401.21s (Evt 25)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="26"
+             data-relative-time-sec="22017.208">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e25.png" alt="Snippet for event at 22017.21s">
+            <span>Time: 22017.21s (Evt 26)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="27"
+             data-relative-time-sec="22292.226">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e26.png" alt="Snippet for event at 22292.23s">
+            <span>Time: 22292.23s (Evt 27)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="28"
+             data-relative-time-sec="22446.038">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e27.png" alt="Snippet for event at 22446.04s">
+            <span>Time: 22446.04s (Evt 28)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="29"
+             data-relative-time-sec="22750.34">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e28.png" alt="Snippet for event at 22750.34s">
+            <span>Time: 22750.34s (Evt 29)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="30"
+             data-relative-time-sec="22798.34">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e29.png" alt="Snippet for event at 22798.34s">
+            <span>Time: 22798.34s (Evt 30)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="31"
+             data-relative-time-sec="22837.283">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e30.png" alt="Snippet for event at 22837.28s">
+            <span>Time: 22837.28s (Evt 31)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="32"
+             data-relative-time-sec="23542.189">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e31.png" alt="Snippet for event at 23542.19s">
+            <span>Time: 23542.19s (Evt 32)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="33"
+             data-relative-time-sec="23634.566">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e32.png" alt="Snippet for event at 23634.57s">
+            <span>Time: 23634.57s (Evt 33)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="34"
+             data-relative-time-sec="24440.906">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e33.png" alt="Snippet for event at 24440.91s">
+            <span>Time: 24440.91s (Evt 34)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="35"
+             data-relative-time-sec="24903.094">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e34.png" alt="Snippet for event at 24903.09s">
+            <span>Time: 24903.09s (Evt 35)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="36"
+             data-relative-time-sec="27636.83">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e35.png" alt="Snippet for event at 27636.83s">
+            <span>Time: 27636.83s (Evt 36)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="37"
+             data-relative-time-sec="28789.585">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e36.png" alt="Snippet for event at 28789.58s">
+            <span>Time: 28789.58s (Evt 37)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="38"
+             data-relative-time-sec="29873.962">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e37.png" alt="Snippet for event at 29873.96s">
+            <span>Time: 29873.96s (Evt 38)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="39"
+             data-relative-time-sec="36295.547">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e38.png" alt="Snippet for event at 36295.55s">
+            <span>Time: 36295.55s (Evt 39)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="40"
+             data-relative-time-sec="36336.453">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e39.png" alt="Snippet for event at 36336.45s">
+            <span>Time: 36336.45s (Evt 40)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="41"
+             data-relative-time-sec="36521.358">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e40.png" alt="Snippet for event at 36521.36s">
+            <span>Time: 36521.36s (Evt 41)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="42"
+             data-relative-time-sec="36923.472">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e41.png" alt="Snippet for event at 36923.47s">
+            <span>Time: 36923.47s (Evt 42)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="43"
+             data-relative-time-sec="36974.642">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e42.png" alt="Snippet for event at 36974.64s">
+            <span>Time: 36974.64s (Evt 43)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="44"
+             data-relative-time-sec="37617.962">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e43.png" alt="Snippet for event at 37617.96s">
+            <span>Time: 37617.96s (Evt 44)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="45"
+             data-relative-time-sec="37687.094">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e44.png" alt="Snippet for event at 37687.09s">
+            <span>Time: 37687.09s (Evt 45)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="46"
+             data-relative-time-sec="37932.679">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e45.png" alt="Snippet for event at 37932.68s">
+            <span>Time: 37932.68s (Evt 46)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="47"
+             data-relative-time-sec="37965.585">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e46.png" alt="Snippet for event at 37965.58s">
+            <span>Time: 37965.58s (Evt 47)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="48"
+             data-relative-time-sec="38358.792">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e47.png" alt="Snippet for event at 38358.79s">
+            <span>Time: 38358.79s (Evt 48)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="49"
+             data-relative-time-sec="38624.604">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e48.png" alt="Snippet for event at 38624.60s">
+            <span>Time: 38624.60s (Evt 49)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="50"
+             data-relative-time-sec="38949.736">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e49.png" alt="Snippet for event at 38949.74s">
+            <span>Time: 38949.74s (Evt 50)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="51"
+             data-relative-time-sec="39354.415">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e50.png" alt="Snippet for event at 39354.42s">
+            <span>Time: 39354.42s (Evt 51)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="52"
+             data-relative-time-sec="39409.811">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e51.png" alt="Snippet for event at 39409.81s">
+            <span>Time: 39409.81s (Evt 52)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="53"
+             data-relative-time-sec="40686.038">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e52.png" alt="Snippet for event at 40686.04s">
+            <span>Time: 40686.04s (Evt 53)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="54"
+             data-relative-time-sec="42361.509">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e53.png" alt="Snippet for event at 42361.51s">
+            <span>Time: 42361.51s (Evt 54)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="55"
+             data-relative-time-sec="44372.981">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e54.png" alt="Snippet for event at 44372.98s">
+            <span>Time: 44372.98s (Evt 55)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="56"
+             data-relative-time-sec="46983.396">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e55.png" alt="Snippet for event at 46983.40s">
+            <span>Time: 46983.40s (Evt 56)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="57"
+             data-relative-time-sec="47255.698">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e56.png" alt="Snippet for event at 47255.70s">
+            <span>Time: 47255.70s (Evt 57)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="58"
+             data-relative-time-sec="47337.509">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e57.png" alt="Snippet for event at 47337.51s">
+            <span>Time: 47337.51s (Evt 58)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="59"
+             data-relative-time-sec="47818.113">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e58.png" alt="Snippet for event at 47818.11s">
+            <span>Time: 47818.11s (Evt 59)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="60"
+             data-relative-time-sec="48545.208">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e59.png" alt="Snippet for event at 48545.21s">
+            <span>Time: 48545.21s (Evt 60)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="61"
+             data-relative-time-sec="49004.377">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e60.png" alt="Snippet for event at 49004.38s">
+            <span>Time: 49004.38s (Evt 61)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="62"
+             data-relative-time-sec="49031.245">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e61.png" alt="Snippet for event at 49031.25s">
+            <span>Time: 49031.25s (Evt 62)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="63"
+             data-relative-time-sec="49077.283">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e62.png" alt="Snippet for event at 49077.28s">
+            <span>Time: 49077.28s (Evt 63)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="64"
+             data-relative-time-sec="49120.302">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e63.png" alt="Snippet for event at 49120.30s">
+            <span>Time: 49120.30s (Evt 64)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="65"
+             data-relative-time-sec="49227.472">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e64.png" alt="Snippet for event at 49227.47s">
+            <span>Time: 49227.47s (Evt 65)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="66"
+             data-relative-time-sec="49361.509">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e65.png" alt="Snippet for event at 49361.51s">
+            <span>Time: 49361.51s (Evt 66)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="67"
+             data-relative-time-sec="49622.038">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e66.png" alt="Snippet for event at 49622.04s">
+            <span>Time: 49622.04s (Evt 67)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="68"
+             data-relative-time-sec="50002.264">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e67.png" alt="Snippet for event at 50002.26s">
+            <span>Time: 50002.26s (Evt 68)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="69"
+             data-relative-time-sec="50104.906">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e68.png" alt="Snippet for event at 50104.91s">
+            <span>Time: 50104.91s (Evt 69)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="70"
+             data-relative-time-sec="51655.094">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e69.png" alt="Snippet for event at 51655.09s">
+            <span>Time: 51655.09s (Evt 70)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="71"
+             data-relative-time-sec="52206.943">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e70.png" alt="Snippet for event at 52206.94s">
+            <span>Time: 52206.94s (Evt 71)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="72"
+             data-relative-time-sec="52740.075">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e71.png" alt="Snippet for event at 52740.07s">
+            <span>Time: 52740.07s (Evt 72)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="73"
+             data-relative-time-sec="52790.189">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e72.png" alt="Snippet for event at 52790.19s">
+            <span>Time: 52790.19s (Evt 73)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="74"
+             data-relative-time-sec="52848.302">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e73.png" alt="Snippet for event at 52848.30s">
+            <span>Time: 52848.30s (Evt 74)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="75"
+             data-relative-time-sec="53175.547">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e74.png" alt="Snippet for event at 53175.55s">
+            <span>Time: 53175.55s (Evt 75)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="76"
+             data-relative-time-sec="53224.0">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e75.png" alt="Snippet for event at 53224.00s">
+            <span>Time: 53224.00s (Evt 76)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="77"
+             data-relative-time-sec="53462.189">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e76.png" alt="Snippet for event at 53462.19s">
+            <span>Time: 53462.19s (Evt 77)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="78"
+             data-relative-time-sec="60931.17">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e77.png" alt="Snippet for event at 60931.17s">
+            <span>Time: 60931.17s (Evt 78)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="79"
+             data-relative-time-sec="63490.264">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e78.png" alt="Snippet for event at 63490.26s">
+            <span>Time: 63490.26s (Evt 79)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="80"
+             data-relative-time-sec="63941.887">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e79.png" alt="Snippet for event at 63941.89s">
+            <span>Time: 63941.89s (Evt 80)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="81"
+             data-relative-time-sec="65442.415">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e80.png" alt="Snippet for event at 65442.42s">
+            <span>Time: 65442.42s (Evt 81)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="82"
+             data-relative-time-sec="65674.264">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e81.png" alt="Snippet for event at 65674.26s">
+            <span>Time: 65674.26s (Evt 82)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="83"
+             data-relative-time-sec="66239.396">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e82.png" alt="Snippet for event at 66239.40s">
+            <span>Time: 66239.40s (Evt 83)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="84"
+             data-relative-time-sec="66546.868">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e83.png" alt="Snippet for event at 66546.87s">
+            <span>Time: 66546.87s (Evt 84)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="85"
+             data-relative-time-sec="67680.302">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e84.png" alt="Snippet for event at 67680.30s">
+            <span>Time: 67680.30s (Evt 85)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="86"
+             data-relative-time-sec="75586.264">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e85.png" alt="Snippet for event at 75586.26s">
+            <span>Time: 75586.26s (Evt 86)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="87"
+             data-relative-time-sec="83364.981">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e86.png" alt="Snippet for event at 83364.98s">
+            <span>Time: 83364.98s (Evt 87)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        
+        <div class="detection-item"
+             data-filename="xa.s12.00.mhz.1969-12-16HR00_evid00006.mseed"
+             data-day-index="1"
+             data-event-index-in-day="88"
+             data-relative-time-sec="83466.717">
+            <img src="labeling_images\xa.s12.00.mhz.1969-12-16HR00_evid00006_d0_e87.png" alt="Snippet for event at 83466.72s">
+            <span>Time: 83466.72s (Evt 88)</span>
+            <label><input type="checkbox" class="event-checkbox"> Mark as Event</label>
+        </div>
+        </div></div>
+
+        <script>
+            function generateCatalog() {
+                const items = document.querySelectorAll('.detection-item');
+                let csvData = "filename,day_index,event_index_in_day,relative_time_sec,label\n"; // CSV Header
+                items.forEach(item => {
+                    const filename = item.dataset.filename;
+                    const dayIndex = item.dataset.dayIndex;
+                    const eventIndexInDay = item.dataset.eventIndexInDay;
+                    const relativeTimeSec = item.dataset.relativeTimeSec;
+                    const checkbox = item.querySelector('.event-checkbox');
+                    const label = checkbox.checked ? 1 : 0;
+                    csvData += `${filename},${dayIndex},${eventIndexInDay},${relativeTimeSec},${label}\n`;
+                });
+                document.getElementById('csvOutput').value = csvData;
+                // Optional: Trigger download
+                // const blob = new Blob([csvData], { type: 'text/csv;charset=utf-g;' });
+                // const link = document.createElement("a");
+                // if (link.download !== undefined) { // feature detection
+                //     const url = URL.createObjectURL(blob);
+                //     link.setAttribute("href", url);
+                //     link.setAttribute("download", "labeled_seismic_catalog.csv");
+                //     link.style.visibility = 'hidden';
+                //     document.body.appendChild(link);
+                //     link.click();
+                //     document.body.removeChild(link);
+                // }
+            }
+        </script>
+    </body>
+    </html>
+    

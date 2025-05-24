@@ -1,0 +1,4 @@
+filename,Event Number,events_in_day(day|event),time_rel(sec),time_abs(sec),Filter_low_freq_point,Filter_high_freq_point,label
+XB.ELYSE.02.BHV.2022-01-02HR04_evid0006,1,0 | 0,2043,0,2.1,2.6,1
+XB.ELYSE.02.BHV.2022-02-03HR08_evid0005,2,1 | 0,421,0,0.6,1.1,1
+XB.ELYSE.02.BHV.2022-02-03HR08_evid0005,3,1 | 1,585,0,0.6,1.1,1
