@@ -1,0 +1,5 @@
+.mseed
+# Ignore all files in any data directory
+data/**
+src/data/**
+figures/data/**
